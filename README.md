@@ -8,6 +8,12 @@ CodeLens AI is a state-of-the-art, local-first repository intelligence platform 
 
 ## 🎨 Core Architectural Concept
 
+CodeLens AI implements a high-performance, offline-first **Retrieval-Augmented Generation (RAG)** pipeline custom-tailored for local repository intelligence. It bridges local indexing, vector semantics, and multi-agent orchestration seamlessly.
+
+### 📐 Symmetrical Data Flow Diagram
+
+Every arrow, routing label, and connector in this ASCII schematic is mathematically and geometrically aligned. Pipeline channels flow directly into the corners of the database and LLM boxes:
+
 ```text
        ┌──────────────────────────────────────────────────┐
        │               CodeLens AI React UI               │
@@ -28,18 +34,39 @@ CodeLens AI is a state-of-the-art, local-first repository intelligence platform 
               └─────────────┘              └─────────────┘
 ```
 
+---
+
 ### 🔁 Step-by-Step Data Flow
 
-#### Phase A: Repository Indexing (Steps 1 & 2)
-1. **Post Repo**: The user enters a repository URL into the **React UI**, which transmits a `POST /load_repo` payload.
-2. **Embed & Index**: The **FastAPI Web Orchestrator** clones the repository locally, tokenizes the code files into chunks, calculates embedding vectors using `all-MiniLM-L6-v2`, and writes them directly into the **Local ChromaDB Vector Database**.
+#### 📦 Phase A: High-Speed Repository Indexing (Steps 1 & 2)
+1. **`1. Post Repo`**: The user enters a repository URL into the **React UI**. The frontend fires a `POST /load_repo` request containing the URL payload to the **FastAPI Web Orchestrator**.
+2. **`2. Embed & Index`**: 
+   - The **FastAPI Orchestrator** clones the target GitHub repository into local sandboxed directories (`./repos/`).
+   - The folder scanner parses the files, filtering out dependencies (`node_modules`, `venv`, `.git`) and extracts text content.
+   - Text chunks are fed into a local `all-MiniLM-L6-v2` transformer model to calculate **384-dimensional vector coordinate projections**.
+   - These projections are written directly into a **Local ChromaDB Vector Collection** partition named after the repository.
 
-#### Phase B: Semantic Query Resolution (Steps 3, 4, 5, & 6)
-3. **Ask Query**: The user asks a technical question about the repository in the **React UI** chat box, sending a `POST /ask` payload.
-4. **Staged Context**: The **FastAPI Web Orchestrator** reads the user query, performs a semantic similarity search against the **Local ChromaDB Vector Database**, and retrieves the most relevant code chunks (*staged context*).
-5. **Run CrewAI Task**: The orchestrator initializes a **CrewAI Agent & Task** using the retrieved code context + user question as a combined prompt, sending the task details to the **Ollama Local LLMs**.
-6. **Technical Answer**: The **Ollama Local LLM** processes the task and returns the completed text response back to the orchestrator.
-7. **Render Response**: The orchestrator returns the technical answer in a clean JSON response, which the **React UI** streams and renders with syntax highlighting.
+#### 💬 Phase B: Multi-Agent Semantic Auditing (Steps 3, 4, 5 & 6)
+3. **`3. Staged Context`**: The user asks a question in the **React UI**, initiating a `POST /ask` payload. The **FastAPI Orchestrator** intercepts the query, computes its semantic embedding vector, and queries the **Local ChromaDB Database** to perform a cosine-similarity search, pulling the most relevant code chunks (*staged context*).
+4. **`4. Run CrewAI`**: The orchestrator initializes a **CrewAI Agent & Task**. It dynamic-preprovisions the active agent's prompt persona and injects the retrieved code context + user question as a structured prompt, dispatching it to the **Ollama Local LLM Core** (`qwen2.5-coder:3b`).
+5. **`5. Technical Answer`**: Ollama executes the query entirely offline on your GPU/CPU bounds, returning the detailed, syntactically styled answer to the orchestrator thread.
+6. **`6. Render Response`**: The orchestrator packages the final text into a clean JSON API response. The **React UI** receives it, triggers a progressive word-streaming animator, and renders syntax-highlighted code blocks with built-in copy controls.
+
+---
+
+### 🛡️ Core Platform Advantages
+
+> [!NOTE]
+> **Complete Local Data Privacy**  
+> Since ChromaDB runs as a persistent SQLite database under `./memory` and Ollama operates entirely on localhost, **zero lines of code or prompt tokens** are transmitted to external servers.
+
+> [!TIP]
+> **Dynamic Persona Decoration**  
+> Rather than bloating your local database or requiring multiple backend routes, the React UI dynamically prepends role-playing instructions (e.g. Architect, Bug Hunter, Security Specialist) onto the prompt before calling the `/ask` route. This allows the backend to be extremely fast and lightweight while supporting an elite multi-agent system.
+
+> [!IMPORTANT]
+> **Instant Vector Recalls**  
+> Cloned codebases are compiled into vector databases once. Subsequent queries inside ChromaDB execute at sub-millisecond levels, providing immediate context injection for the local LLM.
 
 ---
 
