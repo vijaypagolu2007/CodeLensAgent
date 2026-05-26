@@ -8,19 +8,20 @@ CodeLens AI is a state-of-the-art, local-first repository intelligence platform 
 
 ## 🎨 Core Architectural Concept
 
-```
+```text
   ┌──────────────────────────────────────────────────────────┐
   │                   CodeLens AI React UI                   │
-  └─────────────┬──────────────────────────────▲─────────────┘
-   POST /load_repo                             │ POST /ask
-                ▼                              │
-  ┌──────────────────────────┐    ┌────────────┴─────────────┐
-  │    FastAPI Orchestrator  │    │     CrewAI Playground    │
-  └─────────────┬────────────┘    └────────────▲─────────────┘
-                │                              │
-                ▼                              │ Context retrieval
-  ┌──────────────────────────┐    ┌────────────┴─────────────┐
-  │   Local ChromaDB Collection │◄───┤  Ollama Local LLM Cores  │
+  └──────────────┬──────────────────────────────▲────────────┘
+   POST /load_repo  │                              │ JSON Response
+   POST /ask        ▼                              │
+  ┌──────────────────────────────────────────────────────────┐
+  │                   FastAPI Orchestrator                   │
+  │     (Runs CrewAI multi-agent orchestration internally)   │
+  └──────────────┬──────────────────────────────▲────────────┘
+                 │ Calc & store                 │ Query context
+                 ▼                              │
+  ┌──────────────────────────┐    ┌─────────────┴────────────┐
+  │ Local ChromaDB Collection│◄───┤  Ollama Local LLM Cores  │
   └──────────────────────────┘    └──────────────────────────┘
 ```
 
