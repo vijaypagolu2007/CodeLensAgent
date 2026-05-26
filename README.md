@@ -9,21 +9,37 @@ CodeLens AI is a state-of-the-art, local-first repository intelligence platform 
 ## 🎨 Core Architectural Concept
 
 ```text
-  ┌──────────────────────────────────────────────────────────┐
-  │                   CodeLens AI React UI                   │
-  └──────────────┬──────────────────────────────▲────────────┘
-   POST /load_repo  │                              │ JSON Response
-   POST /ask        ▼                              │
-  ┌──────────────────────────────────────────────────────────┐
-  │                   FastAPI Orchestrator                   │
-  │     (Runs CrewAI multi-agent orchestration internally)   │
-  └──────────────┬──────────────────────────────▲────────────┘
-                 │ Calc & store                 │ Query context
-                 ▼                              │
-  ┌──────────────────────────┐    ┌─────────────┴────────────┐
-  │ Local ChromaDB Collection│◄───┤  Ollama Local LLM Cores  │
-  └──────────────────────────┘    └──────────────────────────┘
+       ┌──────────────────────────────────────────────────┐
+       │               CodeLens AI React UI               │
+       └───────────┬──────────────────────────▲───────────┘
+     1. Post Repo  │                          │ 6. Render
+     4. Ask Query  ▼                          │    Response
+       ┌──────────────────────────────────────────────────┐
+       │             FastAPI Web Orchestrator             │
+       │                 (server.py API)                  │
+       └─────┬───────────────────▲─────────────┬──────────┘
+             │                   │             │
+  2. Embed & │ 3. Staged         │ 5. Technical│ 4a. Run CrewAI
+     Index   │    Context        │    Answer   │     Task (Prompt)
+             ▼                   │             ▼
+  ┌──────────────────────────┐   │   ┌────────────────────┐
+  │      Local ChromaDB      │───┘   │ Ollama Local LLMs  │
+  │     Vector Database      │       │ (Qwen2.5-Coder 3B) │
+  └──────────────────────────┘       └────────────────────┘
 ```
+
+### 🔁 Step-by-Step Data Flow
+
+#### Phase A: Repository Indexing (Steps 1 & 2)
+1. **Post Repo**: The user enters a repository URL into the **React UI**, which transmits a `POST /load_repo` payload.
+2. **Embed & Index**: The **FastAPI Web Orchestrator** clones the repository locally, tokenizes the code files into chunks, calculates embedding vectors using `all-MiniLM-L6-v2`, and writes them directly into the **Local ChromaDB Vector Database**.
+
+#### Phase B: Semantic Query Resolution (Steps 3, 4, 5, & 6)
+3. **Ask Query**: The user asks a technical question about the repository in the **React UI** chat box, sending a `POST /ask` payload.
+4. **Staged Context**: The **FastAPI Web Orchestrator** reads the user query, performs a semantic similarity search against the **Local ChromaDB Vector Database**, and retrieves the most relevant code chunks (*staged context*).
+5. **Run CrewAI Task**: The orchestrator initializes a **CrewAI Agent & Task** using the retrieved code context + user question as a combined prompt, sending the task details to the **Ollama Local LLMs**.
+6. **Technical Answer**: The **Ollama Local LLM** processes the task and returns the completed text response back to the orchestrator.
+7. **Render Response**: The orchestrator returns the technical answer in a clean JSON response, which the **React UI** streams and renders with syntax highlighting.
 
 ---
 
