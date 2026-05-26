@@ -17,15 +17,15 @@ CodeLens AI is a state-of-the-art, local-first repository intelligence platform 
        ┌──────────────────────────────────────────────────┐
        │             FastAPI Web Orchestrator             │
        │                 (server.py API)                  │
-       └─────┬───────────────────▲─────────────┬──────────┘
-             │                   │             │
-  2. Embed & │ 3. Staged         │ 5. Technical│ 4a. Run CrewAI
-     Index   │    Context        │    Answer   │     Task (Prompt)
-             ▼                   │             ▼
-  ┌──────────────────────────┐   │   ┌────────────────────┐
-  │      Local ChromaDB      │───┘   │ Ollama Local LLMs  │
-  │     Vector Database      │       │ (Qwen2.5-Coder 3B) │
-  └──────────────────────────┘       └────────────────────┘
+       └─────┬─────────────▲──────────────▲─────────┬─────┘
+             │             │              │         │
+  2. Embed & │  3. Staged  │ 5. Technical │ 4. Run  │
+     Index   │     Context │    Answer    │  CrewAI │
+             ▼             │              │         ▼
+       ┌───────────┐       │              │   ┌───────────┐
+       │   Local   │───────┘              └───│  Ollama   │
+       │ ChromaDB  │                          │ Local LLM │
+       └───────────┘                          └───────────┘
 ```
 
 ### 🔁 Step-by-Step Data Flow
